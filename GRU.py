@@ -47,6 +47,12 @@ class BasicGRU(nn.Module):
 
 def train_GRU(dataloader, device ,input_size=50, hidden_size=50, n_epochs = 20, learning_rate = 0.001):
 
+    print("input_size", input_size)
+    print("hidden_size", hidden_size)
+    print("n_epochs", n_epochs)
+    print("device", device)
+    print("learning_rate", learning_rate)
+    
     HIDDEN_SIZE = hidden_size
     INPUT_SIZE = input_size
     gru = BasicGRU(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE)
@@ -74,7 +80,7 @@ def train_GRU(dataloader, device ,input_size=50, hidden_size=50, n_epochs = 20, 
                 p.data.add_(p.grad.data, alpha=-learning_rate)
 
         print("Loss: {:.4f}".format(loss.item()))
-        PATH = './model/GRU-'+str(epoch)+'.pt'
+        PATH = './model/GRU-'+str(hidden_size)+"-"+str(input_size)+"-"+str(epoch)+'.pt'
         torch.save(gru, PATH) 
 
 def test_GRU(dataloader, model, device, hidden_size=50):

@@ -19,13 +19,19 @@ class BasicRNN(nn.Module):
 
 def train_RNN(dataloader, device, input_size=50, hidden_size=50, n_epochs = 20, learning_rate = 0.001):
 
+    print("input_size", input_size)
+    print("hidden_size", hidden_size)
+    print("n_epochs", n_epochs)
+    print("device", device)
+    print("learning_rate", learning_rate)
+
     rnn = BasicRNN(input_size=input_size, hidden_size=hidden_size)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(rnn.parameters())    
     for epoch in range(1, n_epochs + 1):
         print('Epoch: {}/{}.............'.format(epoch, n_epochs), end=' ')
-        hidden_state = torch.zeros(1, 50, device=device) 
+        hidden_state = torch.zeros(1, hidden_size, device=device) 
         for embedding_tensors, label_tensor in dataloader:
             if label_tensor == -1:
                 continue
@@ -41,7 +47,7 @@ def train_RNN(dataloader, device, input_size=50, hidden_size=50, n_epochs = 20, 
 
         print("Loss: {:.4f}".format(loss.item()))
 
-        PATH = './RNN_model'+str(epoch)+'.pt'
+        PATH = './model/RNN_model'+str(hidden_size)+"-"+str(input_size)+"-"+str(epoch)+'.pt'
         torch.save(rnn, PATH) 
 
 def test_RNN(dataloader, model, device, hidden_size=50):
