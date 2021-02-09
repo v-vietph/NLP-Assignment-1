@@ -100,6 +100,7 @@ def train_LSTM(dataloader, dev_dataloader, device, input_size=50, hidden_size=50
         print("Testing on dev set...")
         dev_acc = test_LSTM(dev_dataloader, lstm, device, hidden_size=hidden_size)
         if dev_acc >= best_acc:
+            best_acc = dev_acc
             print("Saving best model with dev_acc", dev_acc)
             PATH = './model/model_best/LSTM_model_'+str(hidden_size)+"_"+str(input_size)+'.pt'
             torch.save(lstm, PATH) 

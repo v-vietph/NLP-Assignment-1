@@ -17,7 +17,7 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:0" if use_cuda else "cpu")
 torch.autograd.set_detect_anomaly(True)
 
-def train(train_data_dir = './data/train.txt', dev_data_dir = './data/dev.txt',glove_dimension=50, model_to_train = 'RNN', n_epochs=20, learning_rate=0.001, hidden_size=50):
+def train(train_data_dir = './data/train.txt',glove_dimension=50, model_to_train = 'RNN', n_epochs=20, learning_rate=0.001, hidden_size=50, dev_data_dir = './data/dev.txt'):
 
     word_dataset = WordEmbeddingDataset(train_data_dir, dimension=glove_dimension)
     dev_dataset = WordEmbeddingDataset(dev_data_dir, dimension=glove_dimension)
