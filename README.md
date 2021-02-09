@@ -50,7 +50,8 @@ Example run:
 >>> Choose the glove_size <50|100>:100
 Model RNN_model_100_100.pt loaded
 Glove loaded
->>> Input sequence or ctrl+d to finish: a taut , intelligent psychological drama
+>>> Input sequence or ctrl+d to finish: 
+a taut , intelligent psychological drama
 Positive
 ```
 

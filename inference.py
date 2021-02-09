@@ -43,7 +43,7 @@ def inference(model_to_test = 'RNN', hidden_size=50, glove_dimension=50):
     print("Glove loaded")
     
     while(True):
-        in_seq = input("Input sequence or ctrl+d to finish: ")
+        in_seq = input("Input sequence or ctrl+d to finish: \n")
         word_list = in_seq.split()
         tensors = word2tensor(word_list, vocab, glove_dimension)
         output = []
