@@ -63,7 +63,7 @@ class BasicLSTM(nn.Module):
 
         return pre_label, hidden_state, cell_state
 
-def train_LSTM(dataloader, dev_dataloader, device, input_size=50, hidden_size=50, n_epochs = 20, learning_rate = 0.001):
+def train_LSTM(dataloader, device, input_size=50, hidden_size=50, n_epochs = 20, learning_rate = 0.001):
     lstm = BasicLSTM(input_size=input_size, hidden_size=hidden_size, device=device)
     print("input_size", input_size)
     print("hidden_size", hidden_size)
@@ -71,21 +71,21 @@ def train_LSTM(dataloader, dev_dataloader, device, input_size=50, hidden_size=50
     print("device", device)
     print("learning_rate", learning_rate)
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate)
-    best_acc = 0
-
+    optimizer = torch.optim.Adam(lstm.parameters())
+    
     for epoch in range(1, n_epochs + 1):
         print('Epoch: {}/{}.............'.format(epoch, n_epochs), end=' ')
-        running_loss = 0
         for embedding_tensors, label_tensor in dataloader:
             hidden_state = torch.rand(1, hidden_size, device=device) # 1 X n_neurons
             cell_state = torch.rand(1, hidden_size, device=device)
             if label_tensor == -1:
                 continue
             optimizer.zero_grad() # Clears existing gradients from previous epoch
+            # print("embedding_tensors", embedding_tensors.shape)
             for tensor in embedding_tensors[0]:
                 tensor = torch.reshape(tensor, (1,-1))
-                output, hidden_state, cell_state = lstm.forward(tensor.to(device), hidden_state, cell_state)
+                output, hidden_state, cell_state= lstm.forward(tensor.to(device),hidden_state, cell_state)
+            
             # print(output, label_tensor)
             loss = criterion(output, label_tensor.to(device))
             loss.backward(retain_graph=True) # Does backpropagation and calculates gradients
@@ -94,15 +94,11 @@ def train_LSTM(dataloader, dev_dataloader, device, input_size=50, hidden_size=50
             # for p in lstm.parameters():
             #     p.data.add_(p.grad.data, alpha=-learning_rate)
             # print("Loss: {:.4f}".format(loss.item()))
-            running_loss += loss.item()
-        ave_loss = running_loss / len(dataloader)
-        print("Loss: {:.4f}".format(ave_loss))
-        print("Testing on dev set...")
-        dev_acc = test_LSTM(dev_dataloader, lstm, device, hidden_size=hidden_size)
-        if dev_acc >= best_acc:
-            print("Saving best model with dev_acc", dev_acc)
-            PATH = './model/model_best/LSTM_model_'+str(hidden_size)+"_"+str(input_size)+'.pt'
-            torch.save(lstm, PATH) 
+
+        print("Loss: {:.4f}".format(loss.item()))
+        PATH = '/content/NLP-Assignment-1/model/LSTM-'+str(hidden_size)+"-"+str(input_size)+"-"+str(epoch)+'.pt'
+        torch.save(lstm, PATH) 
+    # lstm.save_state_dict(PATH)
 
 def test_LSTM(dataloader, model, device, hidden_size=50):
     correct = 0
@@ -114,9 +110,8 @@ def test_LSTM(dataloader, model, device, hidden_size=50):
             continue
         for tensor in embedding_tensors[0]:
             tensor = torch.reshape(tensor, (1,-1))
-            output, hidden_state, cell_state = model.forward(tensor.to(device), hidden_state, cell_state)
-        if(float(torch.argmax(output) -  label_tensor.to(device)) == 0):
+            output = model.forward(tensor.to(device))
+        if(float(torch.argmax(output) -  label_tensor) == 0):
             correct+=1
         count+=1
     print("ACC", correct/count)
-    return correct/count

@@ -45,7 +45,7 @@ class BasicGRU(nn.Module):
 
         return hidden_state.clone().detach(), pre_label
 
-def train_GRU(dataloader, device ,input_size=50, hidden_size=50, n_epochs = 20, learning_rate = 0.001):
+def train_GRU(dataloader, dev_dataloader, device ,input_size=50, hidden_size=50, n_epochs = 20, learning_rate = 0.001):
 
     print("input_size", input_size)
     print("hidden_size", hidden_size)
@@ -58,13 +58,15 @@ def train_GRU(dataloader, device ,input_size=50, hidden_size=50, n_epochs = 20, 
     gru = BasicGRU(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(gru.parameters())
+    optimizer = torch.optim.Adam(gru.parameters(), lr=learning_rate)
     
+    best_acc = 0
 
     for epoch in range(1, n_epochs + 1):
         print('Epoch: {}/{}.............'.format(epoch, n_epochs), end=' ')
         hidden_state = torch.zeros(1, HIDDEN_SIZE, device=device) # 1 X n_neurons
         cell_state = torch.zeros(1, HIDDEN_SIZE, device=device) # 1 X n_neurons
+        running_loss = 0
         for embedding_tensors, label_tensor in dataloader:
             if label_tensor == -1:
                 continue
@@ -73,15 +75,21 @@ def train_GRU(dataloader, device ,input_size=50, hidden_size=50, n_epochs = 20, 
                 tensor = torch.reshape(tensor, (1,-1))
                 hidden_state, output = gru.forward(tensor.to(device), hidden_state)
             # print(output, label_tensor)
-            loss = criterion(output, label_tensor)
+            loss = criterion(output, label_tensor.to(device))
             loss.backward(retain_graph=True) # Does backpropagation and calculates gradients
-
-            for p in gru.parameters():
-                p.data.add_(p.grad.data, alpha=-learning_rate)
-
-        print("Loss: {:.4f}".format(loss.item()))
-        PATH = './model/GRU-'+str(hidden_size)+"-"+str(input_size)+"-"+str(epoch)+'.pt'
-        torch.save(gru, PATH) 
+            optimizer.step()
+            # for p in gru.parameters():
+            #     p.data.add_(p.grad.data, alpha=-learning_rate)
+            running_loss += loss.item()
+        ave_loss = running_loss / len(dataloader)
+        print("Loss: {:.4f}".format(ave_loss))
+        print("Testing on dev set...")
+        dev_acc = test_GRU(dev_dataloader, gru, device, hidden_size=hidden_size)
+        if dev_acc >= best_acc:
+            print("Saving best model")
+            PATH = './model/model_best/LSTM_model_'+str(hidden_size)+"_"+str(input_size)+'.pt'
+            torch.save(gru, PATH) 
+        
 
 def test_GRU(dataloader, model, device, hidden_size=50):
     correct = 0
@@ -93,7 +101,8 @@ def test_GRU(dataloader, model, device, hidden_size=50):
         for tensor in embedding_tensors[0]:
             tensor = torch.reshape(tensor, (1,-1))
             hidden_state, output = model.forward(tensor.to(device), hidden_state)
-        if(float(torch.argmax(output) -  label_tensor) == 0):
+        if(float(torch.argmax(output) -  label_tensor.to(device)) == 0):
             correct+=1
         count+=1
     print("ACC", correct/count)
+    return correct/count

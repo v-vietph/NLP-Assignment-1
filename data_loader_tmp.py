@@ -17,7 +17,7 @@ class WordEmbeddingDataset(Dataset):
         self.vocab_dict = self.load_glove()
 
     def load_glove(self):
-        glove_path = './glove/glove.6B.'+str(self.dimension)+'d.txt'
+        glove_path = '/content/NLP-Assignment-1/glove/glove.6B.'+str(self.dimension)+'d.txt'
         if not os.path.exists(glove_path):
             raise ValueError ('Can not find the glove file for dimension of', str(self.dimension))  
         if self.dimension == 50:
@@ -59,7 +59,7 @@ class WordEmbeddingDataset(Dataset):
             except KeyError:
                 embeddings.append(self.unknown_vector.astype(np.float32))
         if len(embeddings) == 0:
-            embeddings.append(self.unknown_vector.astype(np.float32))
+          embeddings.append(self.unknown_vector.astype(np.float32))
         tensors = torch.tensor(embeddings)
         embeddings = None
         return tensors

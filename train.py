@@ -17,18 +17,21 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:0" if use_cuda else "cpu")
 torch.autograd.set_detect_anomaly(True)
 
-def train(train_data_dir = './data/train.txt',glove_dimension=50, model_to_train = 'RNN', n_epochs=20, learning_rate=0.001, hidden_size=50):
+def train(train_data_dir = './data/train.txt', dev_data_dir = './data/dev.txt',glove_dimension=50, model_to_train = 'RNN', n_epochs=20, learning_rate=0.001, hidden_size=50):
 
     word_dataset = WordEmbeddingDataset(train_data_dir, dimension=glove_dimension)
+    dev_dataset = WordEmbeddingDataset(dev_data_dir, dimension=glove_dimension)
     dataloader = DataLoader(word_dataset, batch_size=1,
+                            shuffle=True, num_workers=4)
+    dev_dataloader = DataLoader(dev_dataset, batch_size=1,
                             shuffle=True, num_workers=4)
     print("Training model", model_to_train)
     if model_to_train == 'RNN':
-        train_RNN(dataloader=dataloader, device=device,n_epochs = n_epochs, learning_rate = learning_rate, hidden_size=hidden_size, input_size=glove_dimension)
+        train_RNN(dataloader=dataloader, dev_dataloader = dev_dataloader, device=device,n_epochs = n_epochs, learning_rate = learning_rate, hidden_size=hidden_size, input_size=glove_dimension)
     elif model_to_train == 'LSTM':
-        train_LSTM(dataloader=dataloader, device=device,n_epochs = n_epochs, learning_rate = learning_rate, hidden_size=hidden_size, input_size=glove_dimension)
+        train_LSTM(dataloader=dataloader, dev_dataloader = dev_dataloader, device=device,n_epochs = n_epochs, learning_rate = learning_rate, hidden_size=hidden_size, input_size=glove_dimension)
     elif model_to_train == 'GRU':
-        train_GRU(dataloader=dataloader, device=device,n_epochs = n_epochs, learning_rate = learning_rate, hidden_size=hidden_size, input_size=glove_dimension)
+        train_GRU(dataloader=dataloader, dev_dataloader = dev_dataloader, device=device,n_epochs = n_epochs, learning_rate = learning_rate, hidden_size=hidden_size, input_size=glove_dimension)
     
 
 if __name__ == '__main__':

@@ -23,13 +23,13 @@ def test(test_data_dir = './data/test.txt', model_to_test = 'RNN', hidden_size=5
     print("Testing model", model_to_test)
     PATH = './model/model_best/' +model_to_test+"_model_"+str(hidden_size)+"_"+str(glove_dimension)+".pt"
     if model_to_test == 'RNN':
-        rnn = torch.load(PATH)
+        rnn = torch.load(PATH,map_location=device)
         test_RNN(dataloader, rnn, device, hidden_size=hidden_size)
     elif model_to_test == 'LSTM':
-        lstm = torch.load(PATH)
+        lstm = torch.load(PATH, map_location=device)
         test_LSTM(dataloader, lstm, device, hidden_size=hidden_size)
     elif model_to_test == 'GRU':
-        gru = torch.load(PATH)
+        gru = torch.load(PATH, map_location=device)
         test_GRU(dataloader, gru, device, hidden_size=hidden_size)
 
 
